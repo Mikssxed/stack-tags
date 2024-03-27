@@ -15,36 +15,42 @@ interface DataType {
 
 export const Home = () => {
   const queryClient = useQueryClient();
-  const { page, setPage } = usePageStore((state) => ({
-    page: state.page,
-    setPage: state.setPage,
-  }));
+  const { page, setPage, pageSize, setPageSize, order, sort } = usePageStore(
+    (state) => ({
+      pageSize: state.pageSize,
+      page: state.page,
+      order: state.order,
+      sort: state.sort,
+      setPage: state.setPage,
+      setPageSize: state.setPageSize,
+    })
+  );
 
   const { isPending, error, data, isFetching, isPlaceholderData } = useQuery({
     queryKey: ["tags", page],
-    queryFn: () => getTags(page),
+    queryFn: () => getTags(page, pageSize, order, sort),
     placeholderData: keepPreviousData,
     staleTime: 1000 * 60 * 10,
   });
 
   useEffect(() => {
-    if (!isPlaceholderData && data?.hasMore) {
+    if (!isPlaceholderData && data?.has_more && page > 25) {
       queryClient.prefetchQuery({
-        queryKey: ["projects", page + 1],
-        queryFn: () => getTags(page + 1),
+        queryKey: ["tags", page + 1],
+        queryFn: () => getTags(page + 1, pageSize, order, sort),
+        staleTime: 1000 * 60 * 10,
       });
     }
   }, [data, isPlaceholderData, page, queryClient]);
 
-  const tableChange = (pagination, filters, sorter) => {
-    console.log(pagination, sorter, filters);
+  const tableChange = (pagination) => {
+    setPage(pagination.current);
   };
 
   const columns: TableProps<DataType>["columns"] = [
     {
       title: "Name",
       dataIndex: "name",
-      sorter: true,
     },
     { title: "Count", dataIndex: "count" },
   ];
@@ -57,6 +63,10 @@ export const Home = () => {
         columns={columns}
         dataSource={data?.items}
         rowKey={(record) => record.name}
+        pagination={{
+          current: page,
+          total: pageSize * 25,
+        }}
       />
     </main>
   );

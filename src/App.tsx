@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ConfigProvider, theme } from "antd";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Home } from "./pages";
@@ -21,6 +22,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
           </Routes>
+          <ReactQueryDevtools initialIsOpen />
         </BrowserRouter>
       </ConfigProvider>
     </QueryClientProvider>
